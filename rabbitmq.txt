@@ -1,0 +1,22 @@
+namespace
+label_values(rabbitmq_identity_info, namespace)
+
+rabbitmq_identity_info{
+container="rabbitmq",
+endpoint="prometheus",
+instance="10.3.11.198:15692",
+job="operators/rabbitmq",
+namespace="operators",
+pod="my-rabbitmq-server-0",
+rabbitmq_cluster="my-rabbitmq",
+rabbitmq_node="rabbit@my-rabbitmq-server-0.my-rabbitmq-nodes.operators"
+}
+
+rabbitmq_cluster
+label_values(rabbitmq_identity_info{namespace="$namespace"}, rabbitmq_cluster)
+
+
+Ready messages
+sum(rabbitmq_queue_messages_ready * on(instance) group_left(rabbitmq_cluster) rabbitmq_identity_info{rabbitmq_cluster="$rabbitmq_cluster", namespace="$namespace"})
+
+

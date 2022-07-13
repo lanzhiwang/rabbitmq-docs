@@ -1,0 +1,88 @@
+
+
+```yaml
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  labels:
+    app: rabbitmq
+  annotations:
+    some: annotation
+  name: rabbitmqcluster-sample
+  namespace: hz-rabbitmq
+spec:
+  replicas: 3
+  image: my-private-registry/rabbitmq:my-custom-tag
+  imagePullSecrets:
+  - name: some-secret
+  service:
+    type: ClusterIP | NodePort | LoadBalancer
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-internal: 0.0.0.0/0
+  persistence:
+    storageClassName: fast
+    storage: 20Gi
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+            - node-1
+  tolerations:
+    - key: "dedicated"
+      operator: "Equal"
+      value: "rabbitmq"
+      effect: "NoSchedule"
+  rabbitmq:
+    additionalConfig: |
+      channel_max = 1050
+    advancedConfig: |
+      [
+          {ra, [
+              {wal_data_dir, '/var/lib/rabbitmq/quorum-wal'}
+          ]}
+      ].
+    envConfig: |
+      RABBITMQ_DISTRIBUTION_BUFFER_SIZE=some_value
+    additionalPlugins:
+      - rabbitmq_top
+      - rabbitmq_shovel
+  tls:
+    secretName: rabbitmq-server-certs
+    caSecretName: rabbitmq-ca-cert
+    disableNonTLSListeners: true
+  skipPostDeploySteps: false
+  terminationGracePeriodSeconds: 60
+  override:
+    service:
+      spec:
+        ports:
+          - name: additional-port # adds an additional port on the service
+            protocol: TCP
+            port: 12345
+    statefulSet:
+      spec:
+        template:
+          spec:
+            containers:
+              - name: rabbitmq
+                ports:
+                  - containerPort: 12345 # opens an additional port on the rabbitmq server container
+                    name: additional-port
+                    protocol: TCP
+
+
+
+
+```
+

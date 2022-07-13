@@ -1,0 +1,9 @@
+## [How Persistence Works](https://www.rabbitmq.com/persistence-conf.html#how-it-works)
+
+First, some background: both persistent and transient messages can be written to disk. Persistent messages will be written to disk as soon as they reach the queue, while transient messages will be written to disk only so that they can be evicted from memory while under memory pressure. Persistent messages are also kept in memory when possible and only evicted from memory under memory pressure. The "persistence layer" refers to the mechanism used to store messages of both types to disk.  首先，一些背景：持久性和瞬态消息都可以写入磁盘。 持久消息一到达队列就会被写入磁盘，而临时消息只会写入磁盘，以便在内存压力下将它们从内存中驱逐。 持久消息也会尽可能保留在内存中，并且仅在内存压力下从内存中驱逐。 “持久层”是指用于将两种类型的消息存储到磁盘的机制。
+
+On this page we say "queue" to refer to an unmirrored queue or a queue leader or a queue mirror. Queue mirroring is a "layer above" persistence.  在此页面上，我们说“队列”是指未镜像的队列或队列领导者或队列镜像。 队列镜像是“上层”持久化。
+
+The persistence layer has two components: the *queue index* and the *message store*. The queue index is responsible for maintaining knowledge about where a given message is in a queue, along with whether it has been delivered and acknowledged. There is therefore one queue index per queue.  持久层有两个组件：队列索引和消息存储。 队列索引负责维护关于给定消息在队列中的位置以及它是否已被传递和确认的知识。 因此每个队列有一个队列索引。
+
+The message store is a key-value store for messages, shared among all queues in the server. Messages (the body, and any metadata fields: properties and/or headers) can either be stored directly in the queue index, or written to the message store. There are technically two message stores (one for transient and one for persistent messages) but they are usually considered together as "the message store".  消息存储是消息的键值存储，在服务器中的所有队列之间共享。 消息（正文和任何元数据字段：属性和/或标题）可以直接存储在队列索引中，也可以写入消息存储。 从技术上讲，有两种消息存储（一种用于临时消息，一种用于持久消息），但它们通常被一起视为“消息存储”。
