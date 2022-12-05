@@ -295,6 +295,19 @@ See the [documentation on partitions](https://www.rabbitmq.com/partitions.html#a
 
 Default: `cluster_partition_handling = ignore`
 
+
+
+RabbitMQ提供了4种处理网络分区的方式，在rabbitmq.config中配置cluster_partition_handling参数即可，分别为：ignore、pause_minority、pause_if_all_down、autoheal
+
+* ignore: 默认是 ignore, ignore 的配置是当网络分区的时候，RabbitMQ 不会自动做任何处理，即需要手动处理
+
+* pause_minority: 当发生网络分区时，集群中的节点在观察到某些节点 down 掉时，会自动检测其自身是否处于少数派（小于或者等于集群中一半的节点数）。少数派中的节点在分区发生时会自动关闭（类似于执行了 rabbitmqctl stop_app 命令），当分区结束时又会启动。处于关闭的节点会每秒检测一次是否可连通到剩余集群中，如果可以则启动自身的应用，相当于执行 rabbitmqctl start_app 命令。这种处理方式适合集群节点数大于 2 个且最好为奇数的情况。
+
+* pause_if_all_down: 在 pause_if_all_down 模式下，RabbitMQ 会自动关闭不能和 list 中节点通信的节点。语法为 {pause_if_all_down, [nodes], ignore|autoheal}，其中 [nodes] 即为前面所说的 list。如果一个节点与 list 中的所有节点都无法通信时，自关闭其自身。如果 list 中的所有节点都 down 时，其余节点如果是 ok 的话，也会根据这个规则去关闭其自身，此时集群中所有的节点会关闭。如果某节点能够与 list 中的节点恢复通信，那么会启动其自身的 RabbitMQ 应用，慢慢的集群可以恢复。为什么这里会有 ignore 和 autoheal 两种不同的配置，考虑这样一种情况：有两个节点 node1 和 node2 在机架 A 上，node3 和 node4 在机架 B 上，此时机架 A 和机架 B 的通信出现异常，如果此时使用 pause-minority 的话会关闭所有的节点，如果此时采用 pause-if-all-down，list 中配置成 ['node1', 'node3'] 的话，集群中的 4 个节点都不会关闭，但是会形成两个分区，此时就需要 ignore 或者 autoheal 来指引如何处理此种分区的情形。
+
+* autoheal: 在 autoheal 模式下，当认为发生网络分区时，RabbitMQ 会自动决定一个获胜的（winning）分区，然后重启不在这个分区中的节点以恢复网络分区。一个获胜的分区是指客户端连接最多的一个分区。如果产生一个平局，既有两个或者多个分区的客户端连接数一样多，那么节点数最多的一个分区就是获胜的分区。如果此时节点数也一样多，将会以参数输入的顺序来挑选获胜分区。
+
+
 * cluster_keepalive_interval
 
 How frequently nodes should send keepalive messages to other nodes (in milliseconds). Note that this is not the same thing as [net_ticktime](https://www.rabbitmq.com/nettick.html); missed keepalive messages will not cause nodes to be considered down.  节点应该多久向其他节点发送保活消息（以毫秒为单位）。 请注意，这与 net_ticktime 不同； 错过的 keepalive 消息不会导致节点被视为关闭。
