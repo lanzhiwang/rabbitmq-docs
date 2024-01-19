@@ -1,12 +1,12 @@
 
 ```bash
-$ kubectl -n hz-rabbitmq run rabbitmq-test -ti --image=192.168.134.214:60080/3rdparty/rabbitmq:3.8.16-management --rm=true --restart=Never bash
+$ kubectl -n hz-rabbitmq run rabbitmq-test -ti --image=registry.alauda.cn:60080/middleware/rabbitmq/rabbitmq3816-management:v3.16.0-beta.1.g6fe27583 --rm=true --restart=Never bash
 
-$ echo -n 'FQCbHuoNb8IpcU0Cpqz9pNwuYNQdM98Q' > /var/lib/rabbitmq/.erlang.cookie && chown root:root /var/lib/rabbitmq/.erlang.cookie && chmod 400 /var/lib/rabbitmq/.erlang.cookie && cd /opt/rabbitmq/sbin
+$ echo -n 'JNFA4cAH7p6SkF_gUakUz4hbPs-hfZ3o' > /var/lib/rabbitmq/.erlang.cookie && chown root:root /var/lib/rabbitmq/.erlang.cookie && chmod 400 /var/lib/rabbitmq/.erlang.cookie && cd /opt/rabbitmq/sbin
 
-$ ./rabbitmqctl cluster_status -n rabbit@destination-server-0.destination-nodes.hz-rabbitmq -l
+$ ./rabbitmqctl cluster_status -n rabbit@my-rabbitmq-server-0.my-rabbitmq-nodes.hz-rabbitmq -l
 
-$ ./rabbitmqctl list_users -n rabbit@sample-memory-8-server-0.sample-memory-8-nodes.operators -l
+$ ./rabbitmqctl list_users -n rabbit@rabbit@my-rabbitmq-server-0.my-rabbitmq-nodes.hz-rabbitmq -l
 
 
 $ ./rabbitmqctl cluster_status -n rabbit@lanzhiwang-server-0.lanzhiwang-nodes.operators -l

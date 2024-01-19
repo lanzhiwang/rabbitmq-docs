@@ -131,7 +131,7 @@ spec:
           {rabbit, [
             {msg_store_credit_disc_bound, {40000, 8000}},
             {credit_flow_default_credit, {2000, 500}},
-            {queue_index_max_journal_entries, 32768} 
+            {queue_index_max_journal_entries, 32768}
           ]}
       ].
   replicas: 3
